@@ -297,7 +297,7 @@ match on both tables. Don't show me any row that doesn't have a match.
 ``SELECT a.column_name1, a.column_name2, b.column_name1, b.column_name2 from
 table table_name1 INNER JOIN table_name2 b on a.column_name1 = b.column_name2 ``
 
-7
+
 ## LEFT JOIN
 Show me everything from the left table, and whatever matches from the right
 table even if it is NULL on the right table.
@@ -334,7 +334,6 @@ COUNT()
 - You can use these with sub queries like
 `SELECT column_name1, MIN(column_name2)  from table_name where column_name2 =
 (SELECT MIN(column_name2) from table_name);`
-
 
 ## GROUP BY
 used to group aggregated values in a query
@@ -391,27 +390,73 @@ ORDER BY
     ``````
 
 
-## views
+## Views
 Views are a way to store a query into a table like structure so you can easily
-ru it again without having to retype the query so 
-`CREATE VIEW myview as 
+reuse it again without having to retype the query:
+
+`CREATE VIEW myview as
 select colum_name1 from table_name p join table_name2 t on t.column_name1 =
 p.column_name1`
 
-This would store the slect query into ``myview``
+This would store the select query part into ``myview``
 
+##* **Use views with caution**
+Although views are considered useful to avoid repetition and for reuse of
+queries they can make it easy to hide complex queries that contain aggregate
+functions that can slow down execution so they should be used with action
 
-    
+ ## Foreign keys
+ These are column names used by child tables to reference parent tables. They are usually named the same with the parent column name that they are referencing
+
 
 
 ## Transactions, MVCC
-- what is a transaction?
+- **what is a transaction?**
+A transaction is a group of queries put together in such a way that they must
+all run or none them runs.
+A transaction is done by surrounding the group of queries with `BEGIN` and
+`COMMIT` commands
+- Postgresql actually treats all SQL statements as being part of a transaction
+  so if do not state it explicitly, it is implicitly declared.
  - Transactions have an id that can be gotten with `txid_current()`
  every statement has their own unique ``xid``
- -  There's a hidden column in every table `xmin` that you can use to see the common
- ``xid`` that every row of data has to indicate that they were created within the
- same transaction.
-- what is MVCC, WAL, checkpoint?
+ -  There's a hidden column in every table called `xmin` that you can use to see the common ``xid`` that every row of data has to indicate that they were created within the same transaction.
+
+## Relevant Study topics
+- savepoint using  `SAVEPOINT`
+Allows you to rollback to a state you create in your transaction
+After declaring it like so: ``SAVEPOINT my_savepoint``
+You use the `ROLLBACK TO my_savepoint` to get to your savepoint
+
+## window functions
+A window function lets you perform a calculation across a group of related rows without collapsing those rows into one row.
+-- Ranking
+``
+ROW_NUMBER()
+RANK()
+DENSE_RANK()
+``
+-- aggregates
+``
+SUM() OVER (...)
+AVG() OVER (...)
+COUNT() OVER (...)
+MIN() OVER (...)
+MAX() OVER (...)
+``
+-- looking at neigbouring rows
+``
+LAG()
+LEAD()
+``
+
+## INHERTANCE
+Using `INHERITS` statement one can create a table and have that table inherit
+from another.
+
+
+# what is MVCC, WAL, checkpoint?
+
 These four concepts are tightly connected. The easiest way to understand them is to imagine **multiple people using the same PostgreSQL database at the same time**, while the machine could also crash at any moment.
 
 
